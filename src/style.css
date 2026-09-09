@@ -30,3 +30,4 @@ body>main:has(>#lab)>header p{line-height:1.8;color:#b0c0b6}
 .graphics-workbench__toolbar span{font-size:12px;color:var(--lab-muted);margin-left:auto}
 .graphics-workbench__status{font-size:14px;line-height:1.6;color:var(--lab-muted);padding:0 16px 14px;margin:0;min-height:38px}
 @media(max-width:719px){.graphics-workbench__workspace{grid-template-columns:1fr;gap:24px}.graphics-workbench__view{position:static;grid-row:1}.graphics-workbench__viewport{height:380px}.graphics-workbench__controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.graphics-workbench__note,.graphics-workbench__section{grid-column:1/-1}.graphics-workbench__toolbar span{flex-basis:100%;margin:0}.graphics-workbench button{font-size:14px}.graphics-workbench__field{font-size:14px}body>main:has(>#lab){padding:20px}}
+.graphics-workbench__panels{min-width:0}
