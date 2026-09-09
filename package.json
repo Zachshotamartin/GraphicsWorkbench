@@ -1,0 +1,26 @@
+{
+  "name": "@zachshotamartin/graphics-workbench",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./style.css": "./src/style.css"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "CONTRACT.md"
+  ],
+  "peerDependencies": {
+    "three": "^0.180.0"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zachshotamartin/GraphicsWorkbench.git"
+  }
+}
