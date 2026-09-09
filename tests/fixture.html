@@ -6,6 +6,7 @@ window.mountExample = () => {
     const mesh = new ctx.THREE.Mesh(new ctx.THREE.BoxGeometry(6, 3, 2), new ctx.THREE.MeshStandardMaterial());
     ctx.root.add(mesh); window.fixtureMesh = mesh;
     ctx.ui.range('Example radius', { min: 0, max: 10, value: 3, onChange: value => ctx.setStatus(`Radius ${value}`) });
+    ctx.ui.button('Primary action', () => ctx.setStatus('Action complete'), { primary: true });
     ctx.setStatus('Ready'); return {};
   });
   window.lab = lab; window.renderCount = 0;

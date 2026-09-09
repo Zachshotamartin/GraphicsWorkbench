@@ -13,7 +13,7 @@ body>main:has(>#lab)>header p{line-height:1.8;color:#b0c0b6}
 .graphics-workbench__viewport canvas{width:100%;height:100%;display:block;touch-action:none;outline-offset:-4px}
 .graphics-workbench button,.graphics-workbench select,.graphics-workbench input[type=file]{font:inherit;color:var(--lab-text);background:var(--lab-fill);border:1px solid var(--lab-rule);border-radius:3px;min-height:44px;padding:9px 13px;max-width:100%}
 .graphics-workbench button{cursor:pointer;text-align:center;line-height:1.35}
-.graphics-workbench button:hover:not(:disabled){background:#30483d;border-color:#8ba37c}
+.graphics-workbench button:hover:not(:disabled){background:#30483d;color:var(--lab-text);border-color:#8ba37c}
 .graphics-workbench button.is-primary{background:var(--lab-accent);color:#17261f;font-weight:600}
 .graphics-workbench button:disabled{opacity:.45;cursor:default}
 .graphics-workbench :is(button,input,select,canvas):focus-visible{outline:2px solid #d9d3a0;outline-offset:3px}
