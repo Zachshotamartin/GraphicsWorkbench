@@ -14,6 +14,21 @@ try {
   await page.goto(url); await page.waitForFunction(() => window.mountExample);
   await page.evaluate(() => window.mountExample());
   await expect(page.getByRole('slider', { name: 'Example radius', exact: true })).toHaveValue('3');
+  const primary = page.getByRole('button', { name: 'Primary action', exact: true });
+  const contrast = element => {
+    const style = getComputedStyle(element);
+    const luminance = color => color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => {
+      const channel = value / 255; return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+    const foreground = luminance(style.color), background = luminance(style.backgroundColor);
+    return (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
+  };
+  const defaultContrast = await primary.evaluate(contrast);
+  await primary.hover(); const hoverContrast = await primary.evaluate(contrast);
+  assert.ok(defaultContrast >= 4.5, `Primary default contrast ${defaultContrast.toFixed(2)} is below 4.5:1`);
+  assert.ok(hoverContrast >= 4.5, `Primary hover contrast ${hoverContrast.toFixed(2)} is below 4.5:1`);
+  console.log(`Primary button contrast: default ${defaultContrast.toFixed(2)}:1; hover ${hoverContrast.toFixed(2)}:1.`);
+  await page.mouse.move(0, 0);
   await expect.poll(() => page.evaluate(() => window.renderCount)).toBeGreaterThan(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(() => page.evaluate(() => window.lab.ctx.camera.aspect)).toBeLessThan(1);
@@ -84,7 +99,7 @@ try {
   const failed = await disabled.newPage(); await failed.goto(url); await failed.waitForFunction(() => window.mountExample);
   const failure = await failed.evaluate(() => { let message; try { window.mountExample(); } catch (error) { message = error.message; } return { message, remaining: document.querySelector('#host').childElementCount }; });
   assert.match(failure.message, /WebGL/); assert.equal(failure.remaining, 0);
-  console.log('Browser regressions passed: responsive fit, accessible slider, invalid bounds, context restoration, disposal, positive simulation timesteps, and WebGL-unavailable startup.');
+  console.log('Browser regressions passed: button contrast, responsive fit, accessible slider, invalid bounds, context restoration, disposal, positive simulation timesteps, and WebGL-unavailable startup.');
 } finally {
   await browser?.close(); await disabled?.close(); await server.close();
 }
