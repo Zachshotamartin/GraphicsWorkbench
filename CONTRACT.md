@@ -27,3 +27,9 @@ Return { dispose() optional }. Dispose custom CPU resources/listeners not regist
 Package scripts: test `node --test tests/*.test.js`, dev `vite --host 127.0.0.1`, build `vite build`.
 Standalone main imports mountLab from runtime and createExperiment locally; root supplies scaffold.
 Agents own only their assigned project dirs, plus NOTES.md per repo with test/sample instructions. Do not edit portfolio/runtime shared files.
+
+## Switching tools
+
+`mountLab(host, createExperiment, {key})` returns `switchExperiment(key, createExperiment)`, `activeKey`, a live `ctx` getter, and `dispose()`. Switching reuses the canvas and renderer. Each visited tool retains its own scene, camera, UI values, undo history, and simulation state. Only the visible tool receives DOM input and animation frames; workers can finish their current work while inactive. A failed tool mount restores the previous tool. Cached tools are disposed together when the workbench leaves the page.
+
+Tools may return `deactivate()` to cancel an active gesture and `activate()` to restore interaction styling. The runtime releases pointer capture and disconnects the inactive tool’s OrbitControls. Allocate geometry lazily and keep algorithm limits bounded; a cached tool stays resident until final disposal.

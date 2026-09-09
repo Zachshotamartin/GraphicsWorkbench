@@ -29,3 +29,9 @@ npm run test:browser
 The unit tests verify projected bounds, relative zoom and orbit preservation, invalid geometry, and stale cached bounds. The browser script starts an isolated Vite fixture and verifies responsive framing, accessible control labels, WebGL loss/restoration, GPU-resource disposal, and clean startup failure with WebGL disabled. The expected WebGL-disabled check logs the browser's context-creation error.
 
 See `CONTRACT.md` for the full context API. This is shared infrastructure; it is not an additional portfolio experiment. No GitHub Actions are configured.
+
+## One viewport, multiple tools
+
+Call `lab.switchExperiment('clay', createClay)` to switch a mounted workbench. It keeps one WebGL canvas and retains each visited tool’s edits, UI values, and camera. Inactive tools stop receiving pointer input and animation ticks. Leaving the page calls `lab.dispose()` once to release all cached scenes, workers, controls, and GPU resources. Failed tool initialization restores the previous session.
+
+The browser regression covers reuse, retained edits and camera, paused inactive clocks, isolated pointer events, background completion, failure recovery, and full disposal in addition to framing and context restoration.
