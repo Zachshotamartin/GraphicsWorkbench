@@ -43,11 +43,48 @@ try {
     window.lab.dispose(); return { ...disposed, empty: !document.querySelector('#host').childElementCount };
   });
   assert.deepEqual(disposal, { geometry: 1, material: 1, empty: true }); assert.deepEqual(errors, []);
+  const clockPage = await browser.newPage();
+  await clockPage.addInitScript(() => {
+    const callbacks = new Map(); let id = 0;
+    window.requestAnimationFrame = callback => { callbacks.set(++id, callback); return id; };
+    window.cancelAnimationFrame = key => callbacks.delete(key);
+    window.stepFrame = timestamp => { const pending = [...callbacks.values()]; callbacks.clear(); pending.forEach(callback => callback(timestamp)); };
+    window.IntersectionObserver = class {
+      constructor(callback) { this.callback = callback; window.visibilityObserver = this; }
+      observe() { this.callback([{ isIntersecting: true }]); }
+      disconnect() {}
+    };
+  });
+  await clockPage.goto(url); await clockPage.waitForFunction(() => window.mountExample);
+  const clock = await clockPage.evaluate(() => {
+    window.mountExample(); const samples = []; window.lab.ctx.onFrame((dt, elapsed) => samples.push({ dt, elapsed }));
+    // RAF timestamps can precede the mount/visibility performance.now() value.
+    window.stepFrame(0); const first = { samples: samples.length, renders: window.renderCount };
+    window.lab.ctx.invalidate(); window.stepFrame(0);
+    const zero = { samples: samples.length, renders: window.renderCount };
+    window.stepFrame(16);
+    const beforeVisibility = samples.length, timestamp = performance.now();
+    window.visibilityObserver.callback([{ isIntersecting: true }]);
+    window.stepFrame(timestamp);
+    const skippedVisibilityFrame = samples.length === beforeVisibility;
+    window.stepFrame(timestamp + 16); window.stepFrame(timestamp + 1000);
+    window.lab.dispose();
+    return { first, zero, skippedVisibilityFrame, samples };
+  });
+  assert.deepEqual(clock.first, { samples: 0, renders: 1 });
+  assert.deepEqual(clock.zero, { samples: 0, renders: 2 });
+  assert.equal(clock.skippedVisibilityFrame, true);
+  assert.equal(clock.samples.length, 3);
+  clock.samples.forEach((sample, index) => {
+    assert.ok(sample.dt > 0 && sample.dt <= 1 / 30);
+    if (index) assert.ok(sample.elapsed > clock.samples[index - 1].elapsed);
+  });
+  await clockPage.close();
   disabled = await chromium.launch({ channel: 'chromium', args: ['--disable-webgl'] });
   const failed = await disabled.newPage(); await failed.goto(url); await failed.waitForFunction(() => window.mountExample);
   const failure = await failed.evaluate(() => { let message; try { window.mountExample(); } catch (error) { message = error.message; } return { message, remaining: document.querySelector('#host').childElementCount }; });
   assert.match(failure.message, /WebGL/); assert.equal(failure.remaining, 0);
-  console.log('Browser regressions passed: responsive fit, accessible slider, invalid bounds, context restoration, disposal, and WebGL-unavailable startup.');
+  console.log('Browser regressions passed: responsive fit, accessible slider, invalid bounds, context restoration, disposal, positive simulation timesteps, and WebGL-unavailable startup.');
 } finally {
   await browser?.close(); await disabled?.close(); await server.close();
 }
