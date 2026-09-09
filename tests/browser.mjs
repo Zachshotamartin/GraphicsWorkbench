@@ -128,13 +128,22 @@ try {
     window.stepFrame(timestamp);
     const skippedVisibilityFrame = samples.length === beforeVisibility;
     window.stepFrame(timestamp + 16); window.stepFrame(timestamp + 1000);
+    const beforeBatch=samples.length;
+    // Initial layout and a quick scroll can queue both records in one delivery.
+    window.visibilityObserver.callback([{isIntersecting:false},{isIntersecting:true}]);
+    window.stepFrame(timestamp+1020);
+    const resumedFromBatch=samples.length===beforeBatch+1;
+    window.visibilityObserver.callback([{isIntersecting:true},{isIntersecting:false}]);
+    window.stepFrame(timestamp+1040);
+    const pausedFromBatch=samples.length===beforeBatch+1;
     window.lab.dispose();
-    return { first, zero, skippedVisibilityFrame, samples };
+    return { first, zero, skippedVisibilityFrame, resumedFromBatch, pausedFromBatch, samples };
   });
   assert.deepEqual(clock.first, { samples: 0, renders: 1 });
   assert.deepEqual(clock.zero, { samples: 0, renders: 2 });
   assert.equal(clock.skippedVisibilityFrame, true);
-  assert.equal(clock.samples.length, 3);
+  assert.equal(clock.samples.length, 4);
+  assert.equal(clock.resumedFromBatch,true);assert.equal(clock.pausedFromBatch,true);
   clock.samples.forEach((sample, index) => {
     assert.ok(sample.dt > 0 && sample.dt <= 1 / 30);
     if (index) assert.ok(sample.elapsed > clock.samples[index - 1].elapsed);

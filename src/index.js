@@ -131,7 +131,7 @@ export function mountLab(host, createExperiment, options={}) {
   const hint=el('span','','Drag to orbit · scroll to zoom');toolbar.append(hint);
   function resize(){const width=viewport.clientWidth,height=viewport.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);active?.resize();invalidate();}
   const observer=new ResizeObserver(resize);observer.observe(viewport);resize();
-  const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;last=performance.now();if(visible)invalidate();},{rootMargin:'100px'});intersection.observe(viewport);
+  const intersection=new IntersectionObserver(entries=>{const latest=entries.at(-1);if(!latest)return;visible=latest.isIntersecting;last=performance.now();if(visible)invalidate();},{rootMargin:'100px'});intersection.observe(viewport);
   try{switchExperiment(options.key??'default',createExperiment);}catch(error){dispose();throw error;}
   const animate=now=>{
     if(disposed)return;raf=requestAnimationFrame(animate);
